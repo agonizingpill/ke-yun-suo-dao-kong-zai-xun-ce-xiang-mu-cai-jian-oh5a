@@ -1,6 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import Boolean, CheckConstraint, Date, Float, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -21,6 +21,9 @@ class WatchRun(Base):
     camera_review: Mapped[bool] = mapped_column(Boolean)
     recorder: Mapped[str] = mapped_column(String(32))
     marks: Mapped[list["CheckMark"]] = relationship(cascade="all, delete-orphan", lazy="selectin")
+    revisions: Mapped[list["ReviewMarkRevision"]] = relationship(
+        cascade="all, delete-orphan", lazy="selectin", order_by="ReviewMarkRevision.id",
+    )
 
 
 class CheckMark(Base):
@@ -34,3 +37,17 @@ class CheckMark(Base):
     run_id: Mapped[int] = mapped_column(ForeignKey("watch_runs.id"))
     measure_id: Mapped[int] = mapped_column(ForeignKey("measures.id"))
     value: Mapped[float] = mapped_column(Float)
+
+
+class ReviewMarkRevision(Base):
+    """人工复看标签的每次更正都留痕，作为候选失效和台账追溯的依据。"""
+
+    __tablename__ = "review_mark_revisions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey("watch_runs.id"), index=True)
+    previous_value: Mapped[bool] = mapped_column(Boolean)
+    current_value: Mapped[bool] = mapped_column(Boolean)
+    reason: Mapped[str] = mapped_column(String(300))
+    revised_by: Mapped[str] = mapped_column(String(32))
+    revised_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

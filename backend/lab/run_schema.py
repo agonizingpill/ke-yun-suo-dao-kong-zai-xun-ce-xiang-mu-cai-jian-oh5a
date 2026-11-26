@@ -23,3 +23,8 @@ class RunEntry(BaseModel):
         if len(self.marks) != len({m.measure_id for m in self.marks}):
             raise ValueError("同一班次的项目不能重复。")
         return self
+
+
+class ReviewMarkCorrection(BaseModel):
+    camera_review: bool
+    reason: str = Field(min_length=4, max_length=300)

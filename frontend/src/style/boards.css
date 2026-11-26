@@ -48,6 +48,7 @@ button,input,select { font:inherit; }
 .label { display:inline-block; padding:0.1rem 0.42rem; background:var(--surface); border:1px solid var(--border);
   font-size:0.76rem; font-weight:650; white-space:nowrap; }
 .label.locked,.label.rejected,.label.returned { background:oklch(0.9 0.071 53); color:var(--warning); }
+.label.invalid { background:var(--warning); color:var(--surface); }
 .label.kept,.label.approved,.label.issued { background:var(--amber); }
 .label.trial,.label.recorded { background:oklch(0.91 0.1 87); }
 .code { font:700 1.08rem var(--heading); letter-spacing:0.1em; }
@@ -65,6 +66,10 @@ button,input,select { font:inherit; }
 .rank-sheet header { display:flex; align-items:start; justify-content:space-between; gap:0.48rem; }
 .rank-sheet .code { color:var(--warning); }
 .rank-sheet .ledger,.rank-sheet details { margin:0.7rem 0; }
+.rank-sheet details.frozen { border:1px solid var(--border); padding:0.55rem 0.7rem; background:var(--surface); }
+.rank-sheet details.frozen summary { color:var(--muted); cursor:pointer; }
+.rank-sheet details.frozen .manifest { margin-top:0.55rem; font-size:0.84rem; }
+.entry-stack { display:grid; gap:0.9rem; align-items:start; }
 .scoreline { display:flex; flex-wrap:wrap; gap:0.8rem; margin:0.82rem 0; border-bottom:1px solid var(--border); padding-bottom:0.52rem; }
 .scoreline dt { font-size:0.71rem; color:var(--muted); }
 .scoreline dd { font-size:1.32rem; font-weight:700; margin:0; }

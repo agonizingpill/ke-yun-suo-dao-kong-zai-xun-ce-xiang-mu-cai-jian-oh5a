@@ -11,6 +11,7 @@ export function withSession(token) {
     panels: () => get('/panels'),
     trials: panel => get(`/trials${panel ? '?panel_id=' + panel : ''}`),
     logRun: data => post('/runs', data),
+    correctMark: (id, data) => request(`/runs/${id}/review-mark`, {token, data, method:'PATCH'}),
     propose: data => post('/panels', data),
     issue: (id, confirmed) => post(`/panels/${id}/issue`, {confirm_shadow:confirmed}),
     report: data => post('/trials', data),

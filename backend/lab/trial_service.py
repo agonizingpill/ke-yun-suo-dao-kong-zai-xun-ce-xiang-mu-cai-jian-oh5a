@@ -16,6 +16,8 @@ def normalize_trial(row):
 
 def file_trial(db, panel_id, run_id, notes, actor):
     panel = panel_by_id(db, panel_id, lock=True)
+    if panel.state == PanelState.INVALID:
+        raise HTTPException(409, "该候选的训练标签已更正失效，请基于新候选重新安排早晚班复核。")
     if panel.state != PanelState.TRIAL:
         raise HTTPException(409, "当前面板不在影子试行阶段。")
     run = db.get(WatchRun, run_id)
@@ -44,6 +46,8 @@ def review_trial(db, trial_id, approve, note, actor):
         raise HTTPException(404, "找不到试行回执。")
     panel = panel_by_id(db, trial.panel_id, lock=True)
     db.refresh(trial, with_for_update=True)
+    if panel.state == PanelState.INVALID:
+        raise HTTPException(409, "该候选的训练标签已更正失效，回执不再接受复核，请改审重新申报的候选。")
     if panel.state != PanelState.TRIAL or trial.state != TrialState.RECORDED:
         raise HTTPException(409, "仅待复核回执可签。")
     if actor == trial.filed_by:

@@ -7,8 +7,8 @@ from lab.catalog_models import Measure, Series
 from lab.constants import PanelState
 from lab.database import initialize, open_session
 from lab.identity_models import Operator
-from lab.panel_models import Panel, PanelItem
-from lab.run_models import CheckMark, WatchRun
+from lab.panel_models import Panel, PanelItem, TrainingSample
+from lab.run_models import CheckMark, ReviewMarkRevision, WatchRun
 from lab.settings import DEMO_PASSWORD
 from lab.trial_models import ShadowTrial
 
@@ -51,7 +51,8 @@ def seed():
             db.flush()
             series.current_panel_id = panel.id
         db.commit()
-        tracked = (Operator, Measure, Series, WatchRun, CheckMark, Panel, PanelItem, ShadowTrial)
+        tracked = (Operator, Measure, Series, WatchRun, CheckMark, ReviewMarkRevision,
+                   Panel, PanelItem, TrainingSample, ShadowTrial)
         return {m.__tablename__: db.scalar(select(func.count()).select_from(m)) for m in tracked}
 
 

@@ -16,6 +16,7 @@ class PanelState(StrEnum):
     QUEUED = "queued"
     TRIAL = "trial"
     REJECTED = "rejected"
+    INVALID = "invalid"
     ISSUED = "issued"
     ARCHIVED = "archived"
 

@@ -4,8 +4,8 @@ from sqlalchemy import select
 from .auth import Current, Db, Technician
 from .constants import Shift
 from .run_models import WatchRun
-from .run_schema import RunEntry
-from .run_service import normalize_run, record_run
+from .run_schema import ReviewMarkCorrection, RunEntry
+from .run_service import correct_review_mark, normalize_run, record_run
 
 router = APIRouter(prefix="/runs", tags=["班次记录"])
 
@@ -23,3 +23,12 @@ def runs(db: Db, _operator: Current, series_id: int | None = None, shift: Shift 
 @router.post("", status_code=201)
 def add(body: RunEntry, db: Db, operator: Technician):
     return normalize_run(record_run(db, body, operator.username))
+
+
+@router.patch("/{run_id}/review-mark")
+def correct(run_id: int, body: ReviewMarkCorrection, db: Db, operator: Technician):
+    run, invalidated = correct_review_mark(
+        db, run_id, body.camera_review, body.reason.strip(), operator.username,
+    )
+    return {"run": normalize_run(run),
+            "invalidated_panels": [{"id": panel.id, "reference": panel.reference} for panel in invalidated]}
