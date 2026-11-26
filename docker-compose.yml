@@ -1,0 +1,84 @@
+name: ropeway-check-panel
+x-python: &python
+  image: ${COMPOSE_PROJECT_NAME:-ropeway-check-panel}-python:local
+  build: ./backend
+  environment:
+    DB_HOST: db
+    DB_NAME: ${DB_NAME:-ropeway}
+    DB_USER: ${DB_USER:-dispatch}
+    DB_PASSWORD: ${DB_PASSWORD:-demo-ropeway-local}
+    JWT_SECRET: ${JWT_SECRET:-local-ropeway-shadow-panel-signing-key}
+    REDIS_URL: redis://redis:6379/0
+    SEED_DEMO: ${SEED_DEMO:-true}
+    OPENBLAS_NUM_THREADS: '1'
+    OMP_NUM_THREADS: '1'
+  volumes:
+    - panel-evidence:/srv/panels
+  depends_on:
+    db: {condition: service_healthy}
+    redis: {condition: service_healthy}
+services:
+  backend:
+    <<: *python
+    container_name: ${COMPOSE_PROJECT_NAME:-ropeway-check-panel}-backend
+    command: [uvicorn, lab.app:app, --host, 0.0.0.0, --port, '8000']
+    ports: ['127.0.0.1:${BACKEND_PORT:-19304}:8000']
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 24
+  worker:
+    <<: *python
+    container_name: ${COMPOSE_PROJECT_NAME:-ropeway-check-panel}-worker
+    command: [python, -m, lab.worker]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      backend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "from pathlib import Path; import time; assert 0 <= time.time()-Path('/tmp/panel-beat').stat().st_mtime < 20"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  db:
+    image: postgres:16-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-ropeway-check-panel}-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ropeway}
+      POSTGRES_USER: ${DB_USER:-dispatch}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-demo-ropeway-local}
+    ports: ['127.0.0.1:${DB_PORT:-17804}:5432']
+    volumes:
+      - panel-db:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 3s
+      timeout: 4s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-ropeway-check-panel}-redis
+    command: [redis-server, --appendonly, 'yes']
+    volumes:
+      - panel-queue:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 18
+  frontend:
+    build: ./frontend
+    container_name: ${COMPOSE_PROJECT_NAME:-ropeway-check-panel}-frontend
+    ports: ['127.0.0.1:${FRONTEND_PORT:-18304}:80']
+    depends_on:
+      backend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1/api/health']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  panel-db:
+  panel-queue:
+  panel-evidence:

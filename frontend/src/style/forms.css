@@ -1,0 +1,20 @@
+.entry { border-top:6px solid var(--warning); background:var(--field); padding:0.92rem; min-width:0; }
+.entry fieldset { border:1px solid var(--border); margin:0.8rem 0; padding:0.6rem; min-width:0; }
+fieldset legend { color:var(--muted); }
+form > label, .filter { display:grid; gap:0.15rem; margin-bottom:0.5rem; color:var(--muted); font-size:0.86rem; }
+input,select { border:1px solid var(--border); padding:0.48rem 0.62rem; background:var(--field);
+  color:var(--ink); min-width:0; width:100%; }
+label.check { display:flex; align-items:center; gap:0.45rem; }
+label.check input { width:1rem; }
+.measure-form { display:grid; grid-template-columns:1.15fr 0.5fr; gap:0.28rem; align-items:center; font-size:0.76rem;
+  margin-bottom:0.25rem; }
+.measure-form input { padding:0.28rem; }
+.filter { width:min(100%,24rem); }
+.trial-entry { max-width:46rem; margin-bottom:0.8rem; }
+button { min-height:2.35rem; padding:0.4rem 0.62rem; border:1px solid var(--wood); background:var(--wood);
+  color:var(--surface); cursor:pointer; }
+button.subtle { background:transparent; color:var(--wood); }
+button:disabled { opacity:0.55; }
+button:hover:not(:disabled) { filter:brightness(1.12); }
+.form-error { color:var(--warning); margin:0.32rem 0 0; }
+.form-error:empty { display:none; }
